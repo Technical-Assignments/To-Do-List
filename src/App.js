@@ -1,66 +1,76 @@
-import React, { Component } from 'react';
-import TodoInput from './Components/TodoInput';
-import TodoList from './Components/TodoList';
-
+import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import 'bootstrap/dist/css/bootstrap.min.css';
-// import uuid from 'uuid'
-import {v1 as uuid} from "uuid";
+import TodoInput from './components/TodoInput';
+import TodoList from './components/TodoList';
 
-class App extends Component {
-    state = {
-      itmes: [],
-      id: uuid(),
-      item: '',
-      editItem: false
-       
-    }
+function
+  const [items, setItems] = useState([]);
+  const [id, setId] = useState(0);
+  const [item, setItem] = useState('');
+  const [edtItem, setEdtItem] = useState(false);
 
-    handleChange = (e) => {
-      this.setState({
-        item: e.target.value
-      });
-    };
-  
-  handleSubmit = (e) => {
-    e.preventDefault();
-
-    const newItem = {
-      id: this.state.id,
-      title: this.state.item
-    };
-    console.log(newItem, "aaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-
-    const updatedItems = [...this.state.itmes, newItem];
-
-    this.setState({
-      itmes: updatedItems,
-      item: '',
-      id: uuid(),
-      editItem: false
-    });
-
+  const handleChange = (e) => {
+    setItem(e.target.value);
   };
 
-  render() {
-    return (
-      <div className='container'>
-        <div className='row'>
-          <div className='col-10 mx-auto col-md-8 mt-4'>
-            <h3 className='text-capitalize text-center'>todo input</h3>
-          <TodoInput item= {this.state.item} handleChange= {this.handleChange} handleSubmit= {this.handleSubmit} />
-          <TodoList items= {this.state.items} />
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (edtItem) {
+      const newItems = items.map((singleItem) => {
+        if (singleItem.id === id) {
+          return { ...singleItem, title: item };
+        }
+        return singleItem;
+      });
+      setItems(newItems);
+    } else {
+      const newItem = { id: uuidv4(), title: item };
+      setItems((items) => [...items, newItem]);
+    }
+    setItem('');
+    setId(0);
+    setEdtItem(false);
+  };
 
-          </div>
+  const handleEdit = (id) => {
+    const specificItem = items.find((item) => item.id === id);
+    const { title } = specificItem;
+    setItem(title);
+    setEdtItem(true);
+    setId(id);
+  };
 
+  const handleDelete = (id) => {
+    const filteredItems = items.filter((item) => item.id !== id);
+    setItems(filteredItems);
+  };
+
+  const clearList = () => {
+    setItems([]);
+  };
+
+  return (
+    <div className="container">
+      <div className="row">
+        <div className="col-10 mx-auto col-md-8 mt-5">
+          <h3 className="text-capitalize text-center">todo input</h3>
+          <TodoInput
+            item={item}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            editItem={edtItem}
+          />
+          <TodoList
+            items={items}
+            clearList={clearList}
+            handleDelete={handleDelete}
+            handleEdit={handleEdit}
+          />
         </div>
-
       </div>
-     
-    )
-  }
+    </div>
+  );
 }
 
-export default App
-
-
-
+export default App;
